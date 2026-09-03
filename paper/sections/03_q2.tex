@@ -1,0 +1,143 @@
+\section{问题二：单机单弹的四维连续优化}
+
+本问完整继承问题一的导弹运动、烟幕运动、有限圆柱可见集和完整遮蔽评价器，仅把题给固定策略释放为四个连续决策变量。其“继承--调整--输出”关系见表\ref{tab:q2-inherit}。
+
+\begin{table}[tbp]
+\centering
+\caption{问题二相对问题一的继承--调整--输出关系}
+\label{tab:q2-inherit}
+\small
+\begin{tabularx}{\textwidth}{p{0.27\textwidth} X X}
+\toprule
+\textbf{继承} & \textbf{调整} & \textbf{输出} \\
+\midrule
+$\vec m_1(t)$、$\mathcal T$、$\mathcal V_1(t)$、$d_{\rm seg}$ 与完整遮蔽判据 & 将 FY1 航向、速度、投放时刻、起爆延迟由题给常量释放为连续变量，不把投放点和起爆点重复作为自由变量 & 最优四维策略、有效集合 $E_1$、遮蔽时长 $H_1$ 与搜索/几何稳定性证据 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{四维决策变量与完整模型}
+问题二仍由 FY1 干扰 M1。由于无人机一旦确定航向和速度便保持匀速直线运动，投放点和起爆点均可由时序参数唯一确定，因此选取
+\begin{equation}
+\vec x=(\theta,v,t_0,\delta)\in\mathbb R^4
+\label{eq:q2-x}
+\end{equation}
+作为最小充分决策向量，其中 $t_0$ 为投放时刻。给定 $\vec x$ 后，由第5章运动关系得到烟幕轨迹，并用问题一的连续完整遮蔽判据定义
+\begin{equation}
+E_1(\vec x)=\{t:D_1(t;\vec x)\le10\},
+\qquad
+H_1(\vec x)=\mu(E_1(\vec x)).
+\label{eq:q2-obj}
+\end{equation}
+于是问题二的完整模型为
+\begin{equation}
+\left\{
+\begin{aligned}
+\max_{\theta,v,t_0,\delta}\quad & H_1(\vec x),\\
+\text{s.t.}\quad
+&0\le\theta<2\pi,\\
+&70\le v\le140,\\
+&0\le t_0\le T_1,\\
+&0\le\delta\le\sqrt{2h_1/g},\\
+&t_0+\delta\le T_1.
+\end{aligned}
+\right.
+\label{eq:q2-model}
+\end{equation}
+
+四个变量存在明显耦合：$v$ 与 $\theta$ 决定水平可达方向，$t_0$ 决定释放前的飞行距离，而 $\delta$ 同时产生 $v\delta$ 的水平推进和 $g\delta^2/2$ 的高度损失。更重要的是，$H_1$ 由阈值事件的时间集合测度构成，参数的微小变化可能使有效区间产生、合并或消失，因此目标函数具有非光滑和多盆地特征。
+
+\subsection{全局搜索、独立对照与盆地精修}
+主搜索采用差分进化（Differential Evolution, DE）\cite{ref2,ref3,ref9}。设第 $g$ 代第 $i$ 个候选为 $\vec x_{i,g}$，当前最好个体为 $\vec x_{\rm best,g}$，主支路使用 best/1/bin 变异
+\begin{equation}
+\vec v_{i,g}=\vec x_{\rm best,g}
++F(\vec x_{r_1,g}-\vec x_{r_2,g}),
+\label{eq:de-mutation}
+\end{equation}
+再通过二项交叉形成试验个体 $\vec u_{i,g}$。若试验个体满足全部物理约束且严格评价值不低于父代，则完成贪婪替换。由于 DE 属于随机启发式，本问并不依赖单次运行：3 次独立 DE 用于发现多个优质盆地，并以双重退火\cite{ref4}提供不同搜索机制的可行对照；所有候选最终都必须回到同一遮蔽评价器和同一精度下复算。
+
+求解过程按以下五步执行：
+\steptext{1}{全局探索}{在式\eqref{eq:q2-model}的四维可行域内执行3次独立 DE，同时生成双重退火对照候选。}
+\steptext{2}{统一重排}{将各支路候选全部送入同一中高精度 $H_1(\vec x)$ 评价器，消除搜索阶段精度差异造成的排序偏差。}
+\steptext{3}{多盆地保留}{综合目标值与参数空间距离保留4个互异优质盆地，避免局部精修只围绕一个随机初值展开。}
+\steptext{4}{局部缩域}{在各盆地中逐轮缩小参数盒并继续无导数搜索，提升局部边界定位精度。}
+\steptext{5}{严格认证}{对盆地最优候选重新定位遮蔽边界，并执行时间--视线分辨率加密与独立几何核复核。}
+
+\begin{center}
+\begin{minipage}{0.94\textwidth}
+\centering\textbf{算法2：单机单弹的多盆地连续优化}\par\vspace{0.18em}
+\begin{tabularx}{\textwidth}{>{\raggedleft\arraybackslash}p{0.045\textwidth}X}
+\toprule
+\multicolumn{2}{l}{\textbf{输入：}四维可行域 $\Omega$、完整遮蔽评价器 $H_1(\vec x)$、全局与局部搜索预算。}\\
+\multicolumn{2}{l}{\textbf{输出：}FY1 航向、速度、投放/起爆时序与最高精度遮蔽时长。}\\
+\midrule
+1 & 独立初始化多组 DE 种群，并运行双重退火生成异质候选；\\
+2 & 对每个试验个体执行可行域修复，调用统一几何评价器计算 $H_1$；\\
+3 & 汇总前列候选并统一严格重排，按目标值和参数距离提取互异盆地；\\
+4 & 对各盆地执行局部缩域精修；\\
+5 & 对最优候选执行分层数值加密、边界重定位和独立有限圆柱几何校验。\\
+\bottomrule
+\end{tabularx}
+\end{minipage}
+\end{center}
+
+\subsection{最优策略与时长增益}
+最高精度复算得到
+\begin{equation}
+\theta=5.134472^\circ,\quad
+v=139.988137\ \mathrm{m/s},\quad
+t_0=0.814372\ \mathrm s,\quad
+\delta=0.114129\ \mathrm s,
+\label{eq:q2-param}
+\end{equation}
+故起爆时刻为 $\tau=0.928502\,\mathrm s$。投放点和起爆点见表\ref{tab:q2-strategy}。
+
+\begin{table}[tbp]
+\centering
+\caption{问题二单机单弹最终策略}
+\label{tab:q2-strategy}
+\small
+\renewcommand{\arraystretch}{1.20}
+\setlength{\tabcolsep}{4.0pt}
+\begin{tabularx}{\textwidth}{>{\centering\arraybackslash}p{0.10\textwidth} >{\centering\arraybackslash}p{0.12\textwidth} >{\centering\arraybackslash}p{0.12\textwidth} >{\centering\arraybackslash}p{0.12\textwidth} >{\centering\arraybackslash}X >{\centering\arraybackslash}X}
+\toprule
+航向/$^\circ$ & 速度/(m/s) & 投放/s & 延迟/s & 投放点 $(x,y,z)$/m & 起爆点 $(x,y,z)$/m \\
+\midrule
+5.134472 & 139.988137 & 0.814372 & 0.114129 &
+\makecell{$(17913.545,$\\$10.202,1800.000)$} &
+\makecell{$(17929.458,$\\$11.632,1799.936)$} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+对应有效遮蔽区间为
+\[
+E_1=[0.928734,\ 5.516793]\ \mathrm s,
+\]
+故本问优化策略下
+\begin{equation}
+\boxed{H_1=4.588059082\ \mathrm s}.
+\label{eq:q2-result}
+\end{equation}
+在相同完整遮蔽判据下，问题一固定策略的时长为 $1.391656494\,\mathrm s$，本问增加 $3.196402588\,\mathrm s$。图\ref{fig:q2-result}显示，起爆时刻与有效区间起点仅相差约 $2.32\times10^{-4}\,\mathrm s$，说明优化将云团几乎直接送入早期有利视线区域，而不是像固定策略那样等待相对几何关系逐渐改善。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{F04_Q2最优区间与策略增益.pdf}
+  \caption{问题二最优投放--起爆时序与相对固定策略的时长增益}
+  \label{fig:q2-result}
+\end{figure}
+
+\subsection{搜索稳定性与数值验证}
+图\ref{fig:q2-verify}将参数盆地、分辨率收敛和独立几何核复核放在同一图中。多次 DE 的高质量候选集中在航向约 $5^\circ$、投放时刻约 $0.7\,\mathrm s$ 的窄区域，双重退火给出的独立可行解约为 $4.568\,\mathrm s$，虽然略低于最终值，但仍进入同一高质量量级；这说明结论并非由单一初始化偶然产生。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{F03_Q2候选盆地与稳定性.pdf}
+  \caption{问题二候选盆地、数值分辨率与独立几何核复核}
+  \label{fig:q2-verify}
+\end{figure}
+
+固定该策略后，中、高两级离散分别得到 $4.588226318\,\mathrm s$ 和 $4.588059082\,\mathrm s$，差值为 $1.672\times10^{-4}\,\mathrm s$；独立有限圆柱几何核的最大绝对距离差为 $2.32\times10^{-5}\,\mathrm m$。因此该策略在搜索机制、离散精度和几何实现三个层面均表现稳定。由于主搜索仍属于随机启发式，本文将其表述为\textbf{稳定高质量解}，不作理论全局最优声明。
+
+\FloatBarrier
