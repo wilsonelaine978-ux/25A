@@ -1,0 +1,115 @@
+\section{问题四：三机单弹的时域接力协同优化}
+
+\subsection{三平台十二维联合模型}
+问题四仍只干扰 M1，但由 FY1--FY3 各投放一枚烟幕。相较问题三，有限圆柱几何核和多烟幕联合判据完全继承，变化在于三枚烟幕分别来自三条独立航迹，不再共享航向和速度。其继承--调整关系见表\ref{tab:q4-inherit}。
+
+\begin{table}[tbp]
+\centering
+\caption{问题四相对问题三的继承--调整--输出关系}
+\label{tab:q4-inherit}
+\small
+\begin{tabularx}{\textwidth}{p{0.25\textwidth} X X}
+\toprule
+\textbf{继承} & \textbf{调整} & \textbf{输出} \\
+\midrule
+$\mathcal T$、$\mathcal V_1(t)$、$d_{\rm seg}$、多烟幕 $\max$--$\min$ 完整遮蔽判据 & 三枚烟幕分别来自 FY1--FY3；三组航向、速度和投放/起爆时序相互独立；无同机投弹间隔耦合 & 三机联合有效集合 $E_1$、时长 $H_1$，以及各机独立区间与联合区间的集合关系 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+对 FY$i$ 定义四维变量块
+\begin{equation}
+\vec x_i=(\theta_i,v_i,t_i,\delta_i),\qquad i=1,2,3,
+\end{equation}
+总决策向量为
+\begin{equation}
+\vec x=(\vec x_1,\vec x_2,\vec x_3)\in\mathbb R^{12}.
+\label{eq:q4-x}
+\end{equation}
+时刻 $t$ 的有效烟幕中心集合仍记为 $\mathcal C(t;\vec x)$，故 $D_1(t;\vec x)$ 继续按式\eqref{eq:q3-D}计算，目标为
+\[
+H_1(\vec x)=\mu\{t:D_1(t;\vec x)\le10\}.
+\]
+完整模型为
+\begin{equation}
+\left\{
+\begin{aligned}
+\max_{\vec x}\quad &H_1(\vec x),\\
+\text{s.t.}\quad
+&0\le\theta_i<2\pi,\quad i=1,2,3,\\
+&70\le v_i\le140,\quad i=1,2,3,\\
+&0\le t_i\le T_1,\quad i=1,2,3,\\
+&0\le\delta_i\le\sqrt{2h_i/g},\quad i=1,2,3,\\
+&t_i+\delta_i\le T_1,\quad i=1,2,3.
+\end{aligned}
+\right.
+\label{eq:q4-model}
+\end{equation}
+
+记三枚烟幕单独使用时的有效集合为 $E_{\rm FY1},E_{\rm FY2},E_{\rm FY3}$。由于增加烟幕只会使式\eqref{eq:q3-D}中的内层最小值不增，因此恒有
+\begin{equation}
+E_{\rm FY1}\cup E_{\rm FY2}\cup E_{\rm FY3}\subseteq E_1.
+\label{eq:q4-union-relation}
+\end{equation}
+若最终为严格包含，则存在“单枚均不能完整遮蔽、但多枚空间互补后可完整遮蔽”的额外时间；若最终取等号，则协同主要表现为不同无人机在时间轴上的接力。该集合关系为本问结果机制的直接判据。
+
+\subsection{结构化候选与变量块精修}
+十二维完全随机初始化会产生大量无法形成有效遮蔽的个体。为提高搜索有效率，先分别构造 FY1--FY3 的单机候选库，再将不同无人机的优质候选交叉组合并混入随机样本，形成完整十二维种群。全局阶段采用多条差分进化支路以保留探索多样性；候选统一严格复算后保留多个互异盆地。
+
+局部阶段利用 $\vec x=(\vec x_1,\vec x_2,\vec x_3)$ 的自然块结构：一次只开放一架无人机的四个变量，其余两架暂时固定，依次轮换 FY1--FY3；每次候选比较仍重新计算完整三机联合目标。空间结构基本稳定后，再单独细化投放和起爆时序。分块只改变局部搜索组织方式，不改变十二维模型与联合评价函数。
+
+\steptext{1}{单机候选预筛}{分别获得 FY1--FY3 的单机可行优质参数，建立结构化联合初值。}
+\steptext{2}{十二维联合搜索}{多支路搜索完整模型\eqref{eq:q4-model}，统一按三烟幕联合 $H_1$ 评价。}
+\steptext{3}{多盆地保留}{严格重排候选，根据目标值和参数距离保留多个互异盆地。}
+\steptext{4}{三机变量块轮换}{依次开放 $\vec x_1,\vec x_2,\vec x_3$ 进行局部精修，并穿插小尺度跨机扰动。}
+\steptext{5}{时序抛光与认证}{细化投放/起爆时刻，最后执行三级复算、约束回代和独立几何核校验。}
+
+\subsection{最终策略与时域接力机制}
+最终三架无人机的策略见表\ref{tab:q4}。
+
+\begin{table}[tbp]
+\centering
+\caption{问题四三架无人机最终策略}
+\label{tab:q4}
+\small
+\begin{tabular}{lccccc}
+\toprule
+无人机 & 航向/$^\circ$ & 速度/(m/s) & 投放/s & 起爆延迟/s & 起爆/s \\
+\midrule
+FY1 & 5.062709 & 130.262587 & 0.872988 & 0.122159 & 0.995147 \\
+FY2 & 280.289844 & 140.000000 & 3.968104 & 5.833163 & 9.801267 \\
+FY3 & 75.593388 & 140.000000 & 21.268033 & 1.530087 & 22.798120 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+三架无人机单独形成的有效区间分别为
+\begin{align*}
+E_{\rm FY1}&=[1.000517,5.587754]\ \mathrm s,\\
+E_{\rm FY2}&=[10.378120,14.318231]\ \mathrm s,\\
+E_{\rm FY3}&=[23.530826,26.672740]\ \mathrm s.
+\end{align*}
+三段区间彼此不重叠，且最终联合结果恰好满足
+\[
+E_1=E_{\rm FY1}\cup E_{\rm FY2}\cup E_{\rm FY3}.
+\]
+因此式\eqref{eq:q4-union-relation}在最终方案处取等号，表明本问没有依赖“同一时刻多烟幕空间拼接”产生额外完整遮蔽，而是由三架无人机依靠不同初始位置形成前、中、后三段\textbf{时域接力}。联合时长为
+\begin{equation}
+\boxed{H_1=11.669261475\ \mathrm s}.
+\label{eq:q4-result}
+\end{equation}
+图\ref{fig:q4-relay}以同一时间轴直接展示了三段独立区间和联合并集，避免仅从三张分离结果图推断协同机制。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.94\textwidth]{F06_Q4时域接力与收敛.pdf}
+  \caption{问题四三机时域接力结构与三级数值复算}
+  \label{fig:q4-relay}
+\end{figure}
+
+\subsection{结果增益与数值验证}
+现有求解记录显示，结构化联合候选已经达到约 $11.63\,\mathrm s$；完整十二维联合搜索进一步进入约 $11.677\,\mathrm s$ 的中精度候选层级，随后变量块精修和时序抛光只承担更细尺度的改善。最终严格 L1/L2/L3 复算得到 $11.675208$、$11.670319$ 和 $11.669261475\,\mathrm s$，中、高两级差约 $0.001057\,\mathrm s$；独立有限圆柱几何核的最大绝对距离差约 $7.27\times10^{-5}\,\mathrm m$。
+
+FY2 与 FY3 的速度达到 $140\,\mathrm{m/s}$ 上界，而 FY1 约为 $130.26\,\mathrm{m/s}$，说明不同初始空间位置对应不同的最佳到达节奏。更重要的是，最终区间完全分离这一集合事实给出了比“参数达到上界”更直接的机制证据：\textbf{三机协同收益主要来自可达时间窗的纵向接续，而非同时多云团的横向空间互补。}
+
+\FloatBarrier
