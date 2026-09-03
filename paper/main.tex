@@ -24,6 +24,8 @@
 \setlength{\floatsep}{7pt plus 2pt minus 2pt}
 \setlength{\intextsep}{7pt plus 2pt minus 2pt}
 \newcommand{\steptext}[3]{\par\noindent\textbf{STEP#1：#2。}#3\par\vspace{0.10em}}
+% 重点文字统一使用黑体/无衬线粗体，与正文宋体形成清晰视觉层级。
+% 数学重点同时启用 boldmath，避免中文已加粗而数字/符号仍保持常规字重。
 \renewcommand{\keyresult}[1]{{\sffamily\bfseries\boldmath #1}}
 \newcommand{\inlinebox}[1]{\(\boxed{#1}\)}
 \newcommand{\abslead}[1]{{\sffamily\bfseries #1}}
@@ -51,5 +53,11 @@
 \keywords{烟幕干扰；有限视线段；完整遮蔽；差分进化；协同优化}
 \clearpage
 
-% 完整正文见本文件后续内容。为避免通过连接器单次写入超限，本次先创建主入口；后续提交将继续用完整本地源覆盖。
+\input{sections/01_front.tex}
+\input{sections/02_common_q1.tex}
+\input{sections/03_q2.tex}
+\input{sections/04_q3.tex}
+\input{sections/05_q4.tex}
+\input{sections/06_q5.tex}
+\input{sections/07_validation_closing.tex}
 \end{document}
