@@ -1,0 +1,120 @@
+\section{问题三：单机三弹的联合时序优化}
+
+\subsection{从单烟幕判据到三烟幕联合判据}
+本问仍由 FY1 干扰 M1，因此问题一、二中的导弹运动、无人机运动、有限圆柱可见集和点到有限视线段距离均保持不变，只把单枚烟幕扩展为共享同一航迹的三枚烟幕。继承关系见表\ref{tab:q3-inherit}。
+
+\begin{table}[tbp]
+\centering
+\caption{问题三相对问题二的继承--调整--输出关系}
+\label{tab:q3-inherit}
+\small
+\begin{tabularx}{\textwidth}{p{0.25\textwidth} X X}
+\toprule
+\textbf{继承} & \textbf{调整} & \textbf{输出} \\
+\midrule
+$\vec m_1(t)$、$\vec f_1(t)$、$\mathcal T$、$\mathcal V_1(t)$、$d_{\rm seg}$ & 一条共享航迹上增加3组投放/起爆时序；同机相邻投放间隔不小于 $1\,\mathrm s$；每条视线可由不同烟幕承担遮蔽 & 三弹联合有效集合 $E_1$、时长 $H_1$ 与各弹独立作用区间 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+按投放先后编号，定义八维决策向量
+\begin{equation}
+\vec x=(\theta,v,t_1,t_2,t_3,\delta_1,\delta_2,\delta_3)\in\mathbb R^8.
+\label{eq:q3-x}
+\end{equation}
+其中三枚烟幕共享 $\theta,v$。给定 $\vec x$ 后，令 $\mathcal C(t;\vec x)$ 为时刻 $t$ 的有效烟幕中心集合，则问题一的单烟幕距离指标自然推广为
+\begin{equation}
+D_1(t;\vec x)=
+\max_{\vec q\in\mathcal V_1(t)}
+\min_{\vec c\in\mathcal C(t;\vec x)}
+ d_{\rm seg}\!\left(\vec c,[\vec m_1(t),\vec q]\right).
+\label{eq:q3-D}
+\end{equation}
+若 $\mathcal C(t;\vec x)=\varnothing$，约定 $D_1(t;\vec x)=+\infty$。式\eqref{eq:q3-D}的量词次序具有明确含义：\textbf{先对烟幕取最小值，允许不同烟幕分别遮挡不同视线；再对可见目标点取最大值，保证整个有限目标的每一条可见视线都被覆盖。}
+
+由此定义
+\begin{equation}
+E_1(\vec x)=\{t:D_1(t;\vec x)\le10\},
+\qquad
+H_1(\vec x)=\mu(E_1(\vec x)).
+\label{eq:q3-obj}
+\end{equation}
+完整八维模型写为
+\begin{equation}
+\left\{
+\begin{aligned}
+\max_{\vec x}\quad & H_1(\vec x),\\
+\text{s.t.}\quad
+&0\le\theta<2\pi,\qquad 70\le v\le140,\\
+&0\le t_1,\\
+&t_2-t_1\ge1,\qquad t_3-t_2\ge1,\\
+&0\le\delta_k\le\sqrt{2h_1/g},\quad k=1,2,3,\\
+&t_k+\delta_k\le T_1,\quad k=1,2,3.
+\end{aligned}
+\right.
+\label{eq:q3-model}
+\end{equation}
+
+\subsection{多支路搜索与活跃边界复核}
+问题二的优质单弹轨迹为三弹问题提供了有物理意义的初值，但八维联合模型可能存在完全不同的时序结构，因此不能只围绕问题二最优点做局部扩展。求解阶段设置三条完整八维搜索支路：一条以优质轨迹为暖启动，一条采用独立分层初值，一条从全域随机初值增强探索；三条支路始终使用同一 $H_1(\vec x)$ 评价函数。
+
+最优候选还可能落在 $t_1=0$、$t_2-t_1=1$ 或 $\delta_k=0$ 等低维边界，而随机种群对这些边界的命中率较低。因此全局搜索后再主动固定疑似活跃约束，构造4--5维边界子问题进行独立复核。该步骤的目的不是重新定义模型，而是检验“边界最优”是否由模型结构真实支撑。
+
+\steptext{1}{多源初始化}{同时构造问题二暖启动、独立分层样本和全域随机样本。}
+\steptext{2}{三支路八维搜索}{在同一可行域内执行三条完整八维全局支路，统一评价 $H_1(\vec x)$。}
+\steptext{3}{候选重排与盆地精修}{用同一中高精度评价器重排前列解，保留互异盆地并逐轮缩域。}
+\steptext{4}{主动边界复核}{固定候选中疑似活跃的投放、间隔与起爆延迟约束，建立低维子问题独立搜索。}
+\steptext{5}{严格认证}{执行投放间隔回代、三级数值复算、地面接触诊断和独立几何核校验。}
+
+\subsection{最终策略与联合遮蔽结构}
+最终共享航向和速度分别为
+\[
+\theta=5.134472^\circ,\qquad v=139.988137\ \mathrm{m/s},
+\]
+三枚烟幕的投放、起爆时序见表\ref{tab:q3}。
+
+\begin{table}[tbp]
+\centering
+\caption{问题三 FY1 三枚烟幕的最终时序}
+\label{tab:q3}
+\small
+\begin{tabular}{cccccc}
+\toprule
+弹号 & 投放时刻/s & 起爆延迟/s & 起爆时刻/s & 投放（起爆）点 $(x,y,z)$/m & 独立完整遮蔽/s \\
+\midrule
+1 & 0.000000 & 0.000000 & 0.000000 & $(17800.000,0.000,1800.000)$ & 2.556006 \\
+2 & 1.000000 & 0.000000 & 1.000000 & $(17939.426,12.528,1800.000)$ & 4.225141 \\
+3 & 2.000000 & 0.000000 & 2.000000 & $(18078.853,25.056,1800.000)$ & 0.000000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+联合有效集合为
+\[
+E_1=[0.999999,\ 7.403160]\ \mathrm s,
+\]
+因此
+\begin{equation}
+\boxed{H_1=6.403160400\ \mathrm s}.
+\label{eq:q3-result}
+\end{equation}
+三个投放时刻恰好为 $0,1,2\,\mathrm s$，首投非负约束和两条最小投放间隔均处于活跃边界；前两弹均立即起爆，说明该方案倾向于尽早建立前后衔接的两段完整遮蔽。
+
+\subsection{第三弹零边际现象的消融解释}
+第三弹独立完整遮蔽时长为0，本身并不能说明它对联合目标没有作用。为避免把“独立时长为0”误解成“联合贡献必为0”，进一步直接比较该策略下的时间集合：第二弹单独形成约 $[1.000000,5.225141]$，第一弹单独形成约 $[4.847154,7.403160]$，两者的并集已经等于最终联合集合 $[0.999999,7.403160]$（端点差来自数值边界定位精度）。因此，对\textbf{这一三弹方案}而言，移除第三弹不会缩短已形成的完整遮蔽区间，第三槽位的边际贡献确为0。
+
+这一结论只说明当前方案存在三弹参数冗余，\textbf{不等价于证明“全局最优的两弹问题与三弹问题最优值必然相同”}。因此，本文只作局部饱和解释，不将其外推为两弹问题的全局最优结论。图\ref{fig:q3-saturation}同时给出独立/联合区间及代表性时序扰动：第三弹投放后移 $0.10\,\mathrm s$ 或延迟增加 $0.30\,\mathrm s$ 时，联合时长不变；而第二弹延迟增加 $0.30\,\mathrm s$ 会使目标减少约 $1.279\,\mathrm s$，表明前两弹是决定联合区间的关键时序变量。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.94\textwidth]{F05_Q3联合区间与边际饱和.pdf}
+  \caption{问题三独立/联合遮蔽区间与第三弹零边际平坦方向}
+  \label{fig:q3-saturation}
+\end{figure}
+
+\subsection{边界与数值验证}
+主动边界搜索中，固定“首投为0、首间隔为1、前两弹立即起爆”的低维子问题能够独立复现 $6.403160400\,\mathrm s$；而破坏关键间隔结构后，现有边界搜索记录中的最好值降至约 $5.920017\,\mathrm s$。这说明 $t_1=0$、$t_2-t_1=1$ 与前两弹立即起爆并非单次随机搜索造成的偶然贴边，而是当前策略的重要活跃结构。
+
+三级严格复算得到约 $6.403162$、$6.403163$、$6.403160\,\mathrm s$，中、高两级差约 $3.05\times10^{-6}\,\mathrm s$；独立几何核最大绝对差约 $5.92\times10^{-6}\,\mathrm m$。因此，本问的主要结论可以概括为：\textbf{前两枚烟幕在活跃边界上形成连续时域衔接，第三槽位在当前方案附近呈现零边际冗余方向。}
+
+\FloatBarrier
