@@ -1,0 +1,55 @@
+% !TeX program = xelatex
+\documentclass{cumcmthesis}
+\usepackage{pdflscape}
+\usepackage{makecell}
+\usepackage{diagbox}
+\usepackage{tikz}
+\usepackage{fvextra}
+\usepackage{multicol}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+\graphicspath{{../figures/PDF/}}
+
+\newcommand{\vct}[1]{\vec{#1}}
+\newcommand{\dd}{\,\mathrm d}
+\newcommand{\Tset}{\mathcal T}
+\newcommand{\Qset}{\mathcal Q}
+\newcommand{\Sset}{\mathcal S}
+\newcommand{\clip}{\operatorname{clip}}
+\newcommand{\meas}{\mu}
+\newcommand{\Hs}{H_{\Sigma}}
+\newcommand{\Hu}{H_{\cup}}
+\emergencystretch=2em
+\raggedbottom
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{7pt plus 2pt minus 2pt}
+\setlength{\intextsep}{7pt plus 2pt minus 2pt}
+\newcommand{\steptext}[3]{\par\noindent\textbf{STEP#1：#2。}#3\par\vspace{0.10em}}
+\renewcommand{\keyresult}[1]{{\sffamily\bfseries\boldmath #1}}
+\newcommand{\inlinebox}[1]{\(\boxed{#1}\)}
+\newcommand{\abslead}[1]{{\sffamily\bfseries #1}}
+\newcommand{\absstrong}[1]{{\sffamily\bfseries\boldmath #1}}
+
+\title{基于有限视线段完整遮蔽判据的烟幕干扰弹协同投放优化}
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.10em}
+针对多架无人机投放烟幕干扰弹、持续遮蔽来袭导弹视线的任务规划问题，本文以真实目标的有限几何尺度为出发点，建立“\absstrong{有限视线段完整遮蔽判定—多烟幕联合覆盖—分层连续优化与严格复算}”的统一模型链。真实目标始终保持为半径 $7\,\mathrm m$、高 $10\,\mathrm m$ 的有限闭圆柱；对每一时刻，从导弹到目标可见点构造有限视线段集合，并以最坏视线到有效烟幕域的距离作为完整遮蔽判据，从而避免点目标和无限直线近似造成的误判。
+
+\abslead{针对问题一，}在题给固定策略下建立有限圆柱首次可见点与点到有限线段距离模型，得到唯一有效遮蔽区间 $[8.056430,\,9.448087]\,\mathrm s$，\absstrong{有效遮蔽时长为 $1.391656494\,\mathrm s$}。连续判据与有限射线数值评价器分开表述；中、高两级离散结果仅差 $6.10\times10^{-6}\,\mathrm s$，独立有限圆柱几何核的最大距离差为 $8.66\times10^{-5}\,\mathrm m$。
+
+\abslead{针对问题二至问题四，}依次释放单弹参数、同机三弹时序和三机独立航迹，将决策维数由4维扩展至8维和12维，但完整遮蔽几何核保持不变。问题二得到航向 $5.134472^\circ$、速度 $139.988137\,\mathrm{m/s}$ 的单弹方案，遮蔽时长为 \absstrong{$4.588059082\,\mathrm s$}，较固定策略增加 $3.196403\,\mathrm s$；问题三的三弹联合区间为 $[0.999999,\,7.403160]\,\mathrm s$，时长为 \absstrong{$6.403160400\,\mathrm s$}，其中第三烟幕槽在最终方案中的逐弹边际贡献为0；问题四由 FY1--FY3 形成三个互不重叠的有效区间，累计遮蔽 \absstrong{$11.669261475\,\mathrm s$}，说明主要协同机制是前、中、后三段的时域接力。
+
+\abslead{针对问题五，}建立五机、每机三个连续烟幕槽的40维联合模型，并证明在“烟幕之间无负向作用”及本题任务时域下，该固定槽位表示与“每机至多三枚”的最优目标值等价。模型不设置 UAV--导弹排他分配变量，所有有效烟幕均可同时参与三枚导弹的几何评价；15个单机--单导弹局部子问题仅用于构造结构化初值。全局搜索记录中，结构化/混合初始化支路的严格候选最高达到 $18.93\sim19.18\,\text{导弹}\cdot\mathrm s$，纯随机冷启动支路最高仅为 $1.44\,\text{导弹}\cdot\mathrm s$，随后经五机变量块精修与时序抛光得到最终方案。三枚导弹的有效遮蔽时长分别为 $10.083504639$、$6.718437500$ 和 $7.362644043\,\mathrm s$，主效能为 \absstrong{$H_\Sigma=24.164586182\,\text{导弹}\cdot\mathrm s$}，墙钟并集为 $17.418010254\,\mathrm s$。
+
+全题最终结果均经过分辨率加密与独立有限圆柱几何核复核；问题五 L2--L3 的最大分导弹时长差为 $1.094\times10^{-3}\,\mathrm s$，全题独立几何核最大差不超过 $3.67\times10^{-4}\,\mathrm m$。因此本文将高维启发式结果表述为经多层证据支持的\absstrong{稳定高质量方案}，不作理论全局最优声明。
+\end{abstract}
+
+\keywords{烟幕干扰；有限视线段；完整遮蔽；差分进化；协同优化}
+\clearpage
+
+% 完整正文见本文件后续内容。为避免通过连接器单次写入超限，本次先创建主入口；后续提交将继续用完整本地源覆盖。
+\end{document}
