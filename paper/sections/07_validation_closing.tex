@@ -1,0 +1,132 @@
+\section{模型检验与评价}
+
+\subsection{跨问题数值收敛与几何一致性}
+五问均在最终策略上进行末两级分辨率比较，并用独立有限圆柱几何实现复核关键距离。图\ref{fig:validation}统一给出两类绝对误差，不再用人为门限比值替代原始数值。Q1--Q5 的末两级时长差分别约为 $6.10\times10^{-6}$、$1.67\times10^{-4}$、$3.05\times10^{-6}$、$1.06\times10^{-3}$ 和 $1.09\times10^{-3}\,\mathrm s$；独立几何核最大绝对差分别约为 $8.66\times10^{-5}$、$2.32\times10^{-5}$、$5.92\times10^{-6}$、$7.27\times10^{-5}$ 和 $3.67\times10^{-4}\,\mathrm m$。相对于 $10\,\mathrm m$ 的烟幕有效半径，最大的几何差约为 $3.7\times10^{-5}$ 的相对量级。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.82\textwidth]{F12_全题统一验证.pdf}
+  \caption{五个问题的末级数值收敛与独立有限圆柱几何复核}
+  \label{fig:validation}
+\end{figure}
+
+这些结果说明：最终关键时长在继续加密时间/视线分辨率后只发生毫秒或更小变化，同时两套几何实现对关键距离的差异远小于烟幕半径。数值证据支持本文结果对离散尺度和几何实现的稳定性，但不等价于解析误差上界。
+
+\subsection{模型优势及其证据}
+\begin{enumerate}[label=\arabic*.]
+  \item \textbf{几何对象与题意一致。} 问题一直接在有限闭圆柱的首次可见点集合上定义最坏视线距离，并用有限线段投影截断排除导弹后方/目标后方的伪相交；独立几何核误差最高仅 $3.67\times10^{-4}\,\mathrm m$，说明该几何口径在实现层面保持一致。
+  \item \textbf{多烟幕联合判据保持正确量词顺序。} 式\eqref{eq:q3-D}与\eqref{eq:q5-D}先对有效烟幕取最小距离，再对目标可见点取最大值，使不同烟幕可以分别遮挡不同视线，同时仍要求整个有限目标被完整覆盖。
+  \item \textbf{跨问扩展只增加必要自由度。} 从4维单弹、8维同机三弹、12维三机到40维五机多弹，公共运动与几何评价核不变；问题三、问题四分别通过“第三槽零边际”和“三段区间完全分离”给出了可解释的结构结论，而非只输出参数表。
+  \item \textbf{搜索与认证职责分离。} 启发式算法只负责产生候选；论文结论统一来自严格复算、分辨率加密、约束回代和独立几何核。问题五又利用纯随机冷启动分支形成初始化消融，进一步说明结构化种子的实际作用。
+  \item \textbf{问题五保留跨导弹真实协同。} 模型不设置排他任务分配，同一烟幕可以同时服务多枚导弹；式\eqref{eq:overlap-id}把双重、三重同时干扰与 $H_\Sigma-H_\cup$ 的差异直接对应起来。
+\end{enumerate}
+
+\subsection{局限、改进与推广边界}
+本文按题面采用硬边界球形烟幕、恒定下沉速度和确定性运动学，未考虑风场、浓度衰减、云团形变、投放误差和导弹主动机动。若用于更真实任务，应把云团中心漂移、有效半径和起爆误差建模为随机或区间参数，并在完整遮蔽判据外层加入机会约束、场景鲁棒性或最坏情形评价；此时本文的有限视线段几何核仍可保留，但有效烟幕集合 $\mathcal C(t)$ 与阈值条件需要重构。
+
+另一方面，问题五的目标评价开销高、目标函数非光滑且40维搜索仍依赖随机启发式。当前证据能够支持“稳定高质量方案”，不能提供理论全局最优保证。后续可利用遮蔽区间边界与局部可达能力构造代理模型或自适应采样\cite{ref8}，并在统一函数评价预算下进行更多独立随机种子和异质算法对照。模型可推广到“移动观察者--有限目标--时变遮挡域”的协同规划问题，但必须重新核验目标几何、遮挡域动力学和资源约束，不能直接照搬本题参数。
+
+\AIUsageDeclaration{语言润色、数学表达检查、程序调试与排版辅助}
+
+\begin{thebibliography}{99}
+\bibitem{ref1} 全国大学生数学建模竞赛组织委员会. 2025高教社杯全国大学生数学建模竞赛A题：烟幕干扰弹的投放策略[Z]. 2025.
+\bibitem{ref2} Storn R, Price K. Differential Evolution -- A Simple and Efficient Heuristic for Global Optimization over Continuous Spaces[J]. Journal of Global Optimization, 1997, 11(4): 341--359. DOI: \href{https://doi.org/10.1023/A:1008202821328}{10.1023/A:1008202821328}.
+\bibitem{ref3} Price K V, Storn R M, Lampinen J A. Differential Evolution: A Practical Approach to Global Optimization[M]. Berlin: Springer, 2005. DOI: \href{https://doi.org/10.1007/3-540-31306-0}{10.1007/3-540-31306-0}.
+\bibitem{ref4} Kirkpatrick S, Gelatt C D, Vecchi M P. Optimization by Simulated Annealing[J]. Science, 1983, 220(4598): 671--680. DOI: \href{https://doi.org/10.1126/science.220.4598.671}{10.1126/science.220.4598.671}.
+\bibitem{ref5} Nocedal J, Wright S J. Numerical Optimization[M]. 2nd ed. New York: Springer, 2006. DOI: \href{https://doi.org/10.1007/978-0-387-40065-5}{10.1007/978-0-387-40065-5}.
+\bibitem{ref6} Ericson C. Real-Time Collision Detection[M]. San Francisco: Morgan Kaufmann, 2004.
+\bibitem{ref7} Virtanen P, Gommers R, Oliphant T E, et al. SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python[J]. Nature Methods, 2020, 17: 261--272. DOI: \href{https://doi.org/10.1038/s41592-019-0686-2}{10.1038/s41592-019-0686-2}.
+\bibitem{ref8} Jones D R, Schonlau M, Welch W J. Efficient Global Optimization of Expensive Black-Box Functions[J]. Journal of Global Optimization, 1998, 13: 455--492. DOI: \href{https://doi.org/10.1023/A:1008306431147}{10.1023/A:1008306431147}.
+\bibitem{ref9} Das S, Suganthan P N. Differential Evolution: A Survey of the State-of-the-Art[J]. IEEE Transactions on Evolutionary Computation, 2011, 15(1): 4--31. DOI: \href{https://doi.org/10.1109/TEVC.2010.2059031}{10.1109/TEVC.2010.2059031}.
+\end{thebibliography}
+
+\appendix
+
+\section{支撑材料与附件包说明}
+随文交付的压缩包按照“论文--代码--结果--图片”四类组织，所有文件均与本文当前模型、数值结果和图表一一对应，仅保留论文复现与提交所需材料。各目录用途如下：论文目录保存无代码版、含代码版及可直接编译的 \LaTeX{} 源文件；代码目录保存问题一至问题五的完整 Python 程序；结果目录按五个问题分别保存正式 CSV/JSON 结果、数值收敛记录、几何复核及 result1--result3 填表数据；图片目录保存统一重构的13幅正式图（F00--F12），均同时提供 PDF 与 PNG；绘图代码目录保存统一重绘脚本，所有结果图只读取正式 CSV/JSON 或固定参数做确定性后处理。
+
+\begin{longtable}{p{0.08\textwidth} p{0.32\textwidth} p{0.50\textwidth}}
+\toprule
+序号 & 目录或文件 & 内容及与正文的对应关系 \\
+\midrule
+\endfirsthead
+\toprule
+序号 & 目录或文件 & 内容及与正文的对应关系 \\
+\midrule
+\endhead
+1 & \texttt{论文/论文.pdf} & 无完整代码附录的正式论文版本，包含正文、参考文献、支撑材料说明及关键结果表。 \\
+2 & \texttt{论文/论文\_含代码.pdf} & 在同一论文正文后追加问题一至问题五完整 Python 源程序，便于完整查阅。 \\
+3 & \texttt{论文/main.tex}、\texttt{main\_含代码.tex} & 两个 PDF 对应的 \LaTeX{} 源文件；\texttt{cumcmthesis.cls} 为排版类文件。 \\
+4 & \texttt{代码/1.py--5.py} & 问题一至问题五完整求解程序，分别对应正文第6--10章。 \\
+5 & \texttt{结果/问题1--问题5/} & 各问正式 CSV/JSON 结果、数值收敛、几何复核和 result1--result3 对应数据。 \\
+6 & \texttt{图片/重构图/PDF/} & F00--F12 共13幅正式论文图的 PDF 矢量/高质量原图，包括技术路线、几何机理、结果与验证图。 \\
+7 & \texttt{图片/重构图/PNG/} & 与 F00--F12 逐一对应的 PNG 预览图，便于审图与其他文档引用。 \\
+8 & \texttt{绘图代码/论文图重绘.py} & 统一重绘脚本；只读取正式结果或固定参数做确定性后处理，不承担优化求解。 \\
+\bottomrule
+\end{longtable}
+
+\section{结果表关键坐标}
+
+\subsection{问题三 result1 对应数据}
+\begin{table}[H]
+\centering
+\caption{问题三三枚烟幕弹投放与起爆坐标}
+\small
+\begin{tabular}{cccc}
+\toprule
+弹号 & 投放点 $(x,y,z)$/m & 起爆点 $(x,y,z)$/m & 联合方案说明 \\
+\midrule
+1 & $(17800.000,0.000,1800.000)$ & $(17800.000,0.000,1800.000)$ & 共享航迹 \\
+2 & $(17939.426,12.528,1800.000)$ & $(17939.426,12.528,1800.000)$ & 共享航迹 \\
+3 & $(18078.853,25.056,1800.000)$ & $(18078.853,25.056,1800.000)$ & 共享航迹 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{问题四 result2 对应数据}
+\begin{table}[H]
+\centering
+\caption{问题四三枚烟幕弹投放与起爆坐标}
+\scriptsize
+\begin{tabular}{lcc}
+\toprule
+无人机 & 投放点 $(x,y,z)$/m & 起爆点 $(x,y,z)$/m \\
+\midrule
+FY1 & $(17913.274048,10.035131,1800.000000)$ & $(17929.124678,11.439364,1799.926879)$ \\
+FY2 & $(12099.233931,853.400236,1400.000000)$ & $(12245.109057,49.891715,1233.273626)$ \\
+FY3 & $(6740.813095,-116.105256,700.000000)$ & $(6794.109442,91.370904,688.528286)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{问题五 result3 对应数据}
+\begin{table}[H]
+\centering
+\caption{问题五 result3 关键坐标与事后主要贡献标签}
+\tiny
+\setlength{\tabcolsep}{2.4pt}
+\resizebox{0.99\textwidth}{!}{%
+\begin{tabular}{llrrrrrrl}
+\toprule
+无人机 & 弹号 & 投放$x$/m & 投放$y$/m & 起爆$x$/m & 起爆$y$/m & 起爆$z$/m & 独立时长/s & 标签 \\
+\midrule
+FY1&1&17780.105&0.185&17364.326&4.061&1742.943&4.076458&M1\\
+FY1&2&17334.921&4.335&16731.918&9.956&1679.989&2.184954&M1\\
+FY1&3&16523.903&11.895&14776.287&28.186&791.970&0.000000&M1\\
+FY2&1&11918.082&807.709&11813.267&49.865&1190.530&3.870968&M1\\
+FY2&2&11898.030&662.729&11705.242&-731.188&691.343&0.000000&M3\\
+FY2&3&11386.550&-3035.419&11175.086&-4564.361&547.402&0.000000&M1\\
+FY3&1&6002.565&-2966.568&6072.730&-2052.160&489.724&0.000000&M3\\
+FY3&2&6250.824&268.807&6252.225&287.063&699.916&3.002808&M2\\
+FY3&3&6526.857&3866.135&6558.921&4284.009&656.086&0.000000&M1\\
+FY4&1&10992.377&1919.025&10848.816&394.147&1209.553&3.715630&M2\\
+FY4&2&10931.516&1272.579&10780.230&-334.358&1144.294&3.494441&M3\\
+FY4&3&10265.985&-5796.576&10219.642&-6288.821&1738.472&0.000000&M1\\
+FY5&1&12258.337&-422.680&12242.736&-389.499&1299.664&3.740276&M3\\
+FY5&2&11176.994&1877.051&10826.911&2621.587&1130.578&0.000000&M1\\
+FY5&3&10316.526&3707.040&9776.584&4855.355&896.986&0.000000&M1\\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+\noindent\textit{注：}表中“标签”为最终联合解的事后主要贡献说明，不进入无人机--导弹联合优化的决策变量与约束。完整三维投放坐标、投放时刻、起爆延迟与起爆时刻见附件包 \texttt{结果/问题5/问题5\_result3填表数据.csv}。
