@@ -1,0 +1,228 @@
+\section{模型准备}
+
+本章只建立五问共同使用的坐标、运动关系与真实目标几何。完整遮蔽判据在问题一中建立，随后通过统一评价函数自然推广到多烟幕和多导弹情形。
+
+\subsection{导弹与无人机运动}
+以假目标为坐标原点 $O=(0,0,0)$。第 $j$ 枚导弹初始位置为 $\vec m_j(0)$，其单位飞行方向为
+\begin{equation}
+\vec e_j=-\frac{\vec m_j(0)}{\lVert\vec m_j(0)\rVert},
+\qquad
+\vec m_j(t)=\vec m_j(0)+300t\vec e_j.
+\label{eq:missile}
+\end{equation}
+对应到达假目标的时刻为 $T_j=\lVert\vec m_j(0)\rVert/300$。对多导弹联合问题，统一记任务时间上界为 $T_{\max}=\max_j T_j$；问题一至问题四只需使用 $T_1$。
+
+设 FY$i$ 的初始位置为 $\vec f_i(0)=(x_i,y_i,h_i)$，水平航向角为 $\theta_i$，速度为 $v_i$。定义水平单位方向
+\begin{equation}
+\vec u_i=(\cos\theta_i,\sin\theta_i,0),
+\qquad
+\vec f_i(t)=\vec f_i(0)+v_it\vec u_i,
+\quad 70\le v_i\le140.
+\label{eq:uav}
+\end{equation}
+初始坐标均采用题面数据，后续各问只引用对象编号，不重复列式。
+
+\subsection{烟幕弹与云团运动}
+FY$i$ 的第 $k$ 枚烟幕弹在 $t_{ik}$ 投放，延迟 $\delta_{ik}$ 起爆，故起爆时刻为
+\begin{equation}
+\tau_{ik}=t_{ik}+\delta_{ik}.
+\label{eq:burst-time}
+\end{equation}
+在假设1下，烟幕弹继承无人机水平速度并作抛体运动。记 $\vec e_z=(0,0,1)$，则起爆点为
+\begin{equation}
+\vec b_{ik}=\vec f_i(0)+v_i\tau_{ik}\vec u_i
+-\frac12g\delta_{ik}^{2}\vec e_z,
+\qquad g=9.8\,\mathrm{m/s^2}.
+\label{eq:burst-point}
+\end{equation}
+起爆前不触地给出延迟上界
+\begin{equation}
+0\le\delta_{ik}\le\sqrt{\frac{2h_i}{g}}.
+\label{eq:delay-cap}
+\end{equation}
+起爆后，云团中心在有效期内满足
+\begin{equation}
+\vec c_{ik}(t)=\vec b_{ik}-3(t-\tau_{ik})\vec e_z,
+\qquad t\in[\tau_{ik},\tau_{ik}+20].
+\label{eq:cloud}
+\end{equation}
+记时刻 $t$ 的有效烟幕中心集合为 $\mathcal C(t)$。该集合只包含已经起爆且仍处于 $20\,\mathrm s$ 有效期内的烟幕。
+
+\subsection{真实目标几何}
+真实目标严格保持为题目给出的有限闭圆柱
+\begin{equation}
+\mathcal T=\left\{(x,y,z):x^2+(y-200)^2\le49,\ 0\le z\le10\right\}.
+\label{eq:target}
+\end{equation}
+其半径为 $7\,\mathrm m$、高度为 $10\,\mathrm m$。后文所有视线、距离和遮蔽条件均以该有限实体为终点，不将其退化为中心点。
+
+\section{问题一：固定策略的完整遮蔽评价}
+
+\subsection{固定策略与有限视线段距离}
+问题一中 FY1 的控制参数均由题面给定。其水平航向指向假目标，故 $\theta=\pi$，速度为 $120\,\mathrm{m/s}$；投放时刻取 $t_0=1.5\,\mathrm s$，起爆延迟为 $\delta=3.6\,\mathrm s$，从而起爆时刻
+\[
+\tau=t_0+\delta=5.1\,\mathrm s.
+\]
+由式\eqref{eq:uav}--\eqref{eq:burst-point}得到投放点和起爆点
+\[
+\vec p=(17620,0,1800)\ \mathrm m,
+\qquad
+\vec b=(17188,0,1736.496)\ \mathrm m.
+\]
+
+任取时刻 $t$，导弹位置为 $\vec a=\vec m_1(t)$，目标上一可见点为 $\vec q$，烟幕中心为 $\vec c(t)$。导弹到该目标点的真实视线是有限线段
+\[
+[\vec a,\vec q]=\{\vec a+\lambda(\vec q-\vec a):0\le\lambda\le1\}.
+\]
+令
+\begin{equation}
+\lambda_0=
+\frac{(\vec c-\vec a)\cdot(\vec q-\vec a)}{\lVert\vec q-\vec a\rVert^2},
+\qquad
+\lambda^*=\clip(\lambda_0,0,1),
+\label{eq:lambda}
+\end{equation}
+则点到有限视线段的最短距离为
+\begin{equation}
+ d_{\rm seg}\!\left(\vec c,[\vec a,\vec q]\right)
+ =\left\lVert\vec c-
+ \bigl[\vec a+\lambda^*(\vec q-\vec a)\bigr]\right\rVert .
+\label{eq:dseg}
+\end{equation}
+式\eqref{eq:lambda}中的截断是本题几何判定的重要环节：当正交投影落在线段外时，最近点自动退化为导弹端点或目标端点，因此不会把“烟幕位于导弹后方或目标后方但与无限直线很近”的情况误判为有效遮蔽。几何构造见图\ref{fig:q1-geometry}。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.94\textwidth]{F01_Q1有限视线段几何机理.pdf}
+  \caption{有限视线段完整遮蔽判据的几何构造}
+  \label{fig:q1-geometry}
+\end{figure}
+
+\subsection{有限圆柱可见集与完整遮蔽判据}
+从导弹位置 $\vec m_1(t)$ 向目标 $\mathcal T$ 发出所有能够击中圆柱的射线，并在每条射线上只保留与 $\mathcal T$ 的\textbf{第一个}交点。由这些首次交点构成目标在时刻 $t$ 的可见点集合 $\mathcal V_1(t)$。于是，对整个有限目标的最坏视线距离定义为
+\begin{equation}
+D_1(t)=
+\max_{\vec q\in\mathcal V_1(t)}
+ d_{\rm seg}\!\left(
+ \vec c(t),[\vec m_1(t),\vec q]
+ \right).
+\label{eq:q1-D}
+\end{equation}
+烟幕有效半径为 $R_s=10\,\mathrm m$，故完整遮蔽条件为
+\begin{equation}
+D_1(t)\le R_s.
+\label{eq:q1-block}
+\end{equation}
+
+\begin{propositionbox}
+\textbf{命题1（完整遮蔽等价判据）}\quad
+在球形有效烟幕域 $B(\vec c(t),R_s)$ 下，式\eqref{eq:q1-block}成立，当且仅当从 $M_1$ 指向真实目标可见部分的每一条有限视线段都与该烟幕域相交。
+
+\textbf{证明：}
+若 $D_1(t)\le R_s$，由最大值定义，对任意 $\vec q\in\mathcal V_1(t)$ 均有
+$d_{\rm seg}(\vec c,[\vec m_1,\vec q])\le R_s$，故相应线段与烟幕球相交。反之，若所有可见线段均与烟幕球相交，则每条线段到球心的距离都不超过 $R_s$，取最大仍有 $D_1(t)\le R_s$。证毕。\proofend
+\end{propositionbox}
+
+因此有效时间集合与时长统一写为
+\begin{equation}
+E_1=\{t\in[\tau,\tau+20]\cap[0,T_1]:D_1(t)\le10\},
+\qquad
+H_1=\mu(E_1).
+\label{eq:q1-set}
+\end{equation}
+这一记号在后续各问保持不变：问题一至问题四均针对 $M_1$，因此最终结果始终是不同策略下的 $H_1$，不再以 $H_2,H_3,H_4$ 表示问题编号。
+
+\subsection{有限圆柱首次交点与数值评价器}
+式\eqref{eq:q1-D}是连续可见集上的数学定义。为数值求值，需要构造有限圆柱的可见射线。记圆柱几何中心为 $\vec o=(0,200,5)$，外接球半径为
+\[
+R_B=\sqrt{7^2+5^2}=\sqrt{74}.
+\]
+在通过 $\vec o$ 且垂直于视轴 $\vec o-\vec m_1(t)$ 的法平面内，用外接球切锥确定需要扫描的二维圆盘。若 $d=\lVert\vec o-\vec m_1(t)\rVert$，相应圆盘半径为
+\begin{equation}
+R_{\Pi}(t)=\frac{dR_B}{\sqrt{d^2-R_B^2}}.
+\label{eq:plane-radius}
+\end{equation}
+
+对圆盘中的任一方向 $\vec u$，射线写为
+\[
+\vec r(\rho)=\vec m_1(t)+\rho\vec u,
+\qquad \rho\ge0.
+\]
+设 $\vec m_1(t)=(m_x,m_y,m_z)$、$\vec u=(u_x,u_y,u_z)$。侧面交点满足
+\begin{equation}
+A\rho^2+B\rho+C=0,
+\label{eq:cyl-side}
+\end{equation}
+其中
+\[
+A=u_x^2+u_y^2,\quad
+B=2[m_xu_x+(m_y-200)u_y],\quad
+C=m_x^2+(m_y-200)^2-49.
+\]
+只保留 $\rho\ge0$ 且 $0\le m_z+\rho u_z\le10$ 的根。对上下底面 $z_b\in\{0,10\}$，若 $u_z\ne0$，候选根为
+\begin{equation}
+\rho_b=\frac{z_b-m_z}{u_z},
+\label{eq:cyl-cap}
+\end{equation}
+并要求交点落在半径 $7\,\mathrm m$ 的圆盘内。在全部合法侧面根和底面根中取最小正根 $\rho_{\rm hit}$，即可得到该射线对应的首次可见点
+\begin{equation}
+\vec q=\vec m_1(t)+\rho_{\rm hit}\vec u.
+\label{eq:first-hit}
+\end{equation}
+
+需要强调，\eqref{eq:q1-D}中的 $D_1(t)$ 是连续可见集上的精确定义，而程序只能在有限射线集合上计算其近似值。令 $\mathcal R(t;N)\subset\mathcal V_1(t)$ 表示分辨率参数为 $N$ 时得到的自适应首次交点集合，定义
+\begin{equation}
+\widehat D_1(t;N)=
+\max_{\vec q\in\mathcal R(t;N)}
+ d_{\rm seg}\!\left(\vec c(t),[\vec m_1(t),\vec q]\right).
+\label{eq:q1-Dhat}
+\end{equation}
+本文不把有限采样的 $\widehat D_1$ 宣称为连续最大值的解析精确计算，而是通过\textbf{法平面逐级加密、最坏方向局部再加密以及独立有限圆柱几何核}检验其数值稳定性。这样将“数学判据的精确性”和“数值评价器的近似性”明确分开。
+
+时间方向令 $g(t)=\widehat D_1(t;N)-10$。先粗扫描烟幕有效窗，定位 $g(t)$ 的符号变化区间，再对每个边界执行二分，并同步加密当前最坏视线邻域。求解过程概括为：
+\steptext{1}{固定轨迹计算}{由题给参数得到导弹、无人机、烟幕弹及云团中心轨迹，并确定有效时间窗。}
+\steptext{2}{有限目标可见集离散}{在视轴法平面生成射线，按式\eqref{eq:cyl-side}--\eqref{eq:cyl-cap}求有限圆柱首次交点。}
+\steptext{3}{遮蔽边界初定位}{计算 $\widehat D_1(t;N)-10$，记录符号发生变化的时间小区间。}
+\steptext{4}{时间--几何联合精化}{对候选边界二分时间，同时围绕当前最坏可见方向增加射线密度。}
+\steptext{5}{最高精度复算}{合并有效子区间，使用最高分辨率和独立几何核重新计算边界与距离。}
+
+\begin{center}
+\begin{minipage}{0.94\textwidth}
+\centering\textbf{算法1：固定策略的完整遮蔽边界计算}\par\vspace{0.18em}
+\begin{tabularx}{\textwidth}{>{\raggedleft\arraybackslash}p{0.045\textwidth}X}
+\toprule
+\multicolumn{2}{l}{\textbf{输入：}固定飞行参数、投放/起爆时序，时间与法平面分辨率。}\\
+\multicolumn{2}{l}{\textbf{输出：}有效集合 $E_1$、时长 $H_1$、数值收敛与独立几何复核误差。}\\
+\midrule
+1 & 计算 $\vec m_1(t)$、$\vec c(t)$ 以及烟幕有效时间窗；\\
+2 & 对每个粗时间点生成视轴法平面射线，并求有限圆柱的首次交点集合 $\mathcal R(t;N)$；\\
+3 & 计算 $\widehat D_1(t;N)$，记录与 $10\,\mathrm m$ 阈值发生状态切换的时间小区间；\\
+4 & 对候选边界二分，并在当前最坏可见方向局部加密；\\
+5 & 合并满足阈值的时间区间，以最高精度和独立几何核完成认证。\\
+\bottomrule
+\end{tabularx}
+\end{minipage}
+\end{center}
+
+\subsection{结果与数值认证}
+最高精度复算得到唯一有效遮蔽区间
+\[
+E_1=[8.056430,\ 9.448087]\ \mathrm s,
+\]
+从而
+\begin{equation}
+\boxed{H_1=1.391656494\ \mathrm s}.
+\label{eq:q1-result}
+\end{equation}
+图\ref{fig:q1-result}把阈值边界、离散加密和独立几何核复核放在同一证据链中。进入与退出时刻均对应最坏视线距离达到 $10\,\mathrm m$；有效区间内部的最小距离约为 $4.735\,\mathrm m$，说明中段具有约 $5.265\,\mathrm m$ 的几何裕度。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.93\textwidth]{F02_Q1阈值边界与数值认证.pdf}
+  \caption{问题一完整遮蔽阈值、有效时间窗与数值认证}
+  \label{fig:q1-result}
+\end{figure}
+
+三档离散设置得到的遮蔽时长分别约为 $1.391699\,\mathrm s$、$1.391650\,\mathrm s$ 和 $1.391656494\,\mathrm s$，中、高两级差仅 $6.10\times10^{-6}\,\mathrm s$；独立有限圆柱几何核在复核时刻上的最大绝对距离差约为 $8.66\times10^{-5}\,\mathrm m$。相较于 $10\,\mathrm m$ 的有效半径，这一几何差异处于 $10^{-5}$ 的相对量级。故后续各问均继续使用同一完整遮蔽评价器，并在最终结果处执行同等级别的严格复算。
+
+\FloatBarrier
