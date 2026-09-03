@@ -1,0 +1,279 @@
+\section{问题五：五机多弹对三导弹的四十维联合优化}
+
+问题五同时继承问题三的“同机三弹共享航迹与投弹间隔”以及问题四的“多机独立航迹协同”，并把评价对象从单枚 M1 扩展为 M1--M3。为避免把后验覆盖关系误写成先验任务分配，正式模型始终让全部有效烟幕自由参与每枚导弹的完整遮蔽评价。继承--调整关系见表\ref{tab:q5-inherit}。
+
+\begin{table}[tbp]
+\centering
+\caption{问题五相对问题三、问题四的继承--调整--输出关系}
+\label{tab:q5-inherit}
+\small
+\begin{tabularx}{\textwidth}{p{0.27\textwidth} X X}
+\toprule
+\textbf{继承} & \textbf{调整} & \textbf{输出} \\
+\midrule
+有限圆柱可见集、多烟幕 $\max$--$\min$ 判据、同机投弹间隔、多机独立航迹 & 扩展为5架无人机、每机至多3枚烟幕和3枚导弹；目标由单个 $H_1$ 改为三导弹累计效能 $H_\Sigma$；不设置排他分配变量 & 40维联合策略、$E_1,E_2,E_3$、$H_1,H_2,H_3$、累计效能与墙钟重叠结构 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{三槽连续表示与原题资源约束的等价性}
+对 FY$i$ 定义八维变量块
+\begin{equation}
+\vec x_i=(\theta_i,v_i,t_{i1},t_{i2},t_{i3},\delta_{i1},\delta_{i2},\delta_{i3})\in\mathbb R^8,
+\qquad i=1,\ldots,5,
+\label{eq:q5-block}
+\end{equation}
+总决策向量为
+\begin{equation}
+\vec x=(\vec x_1,\ldots,\vec x_5)\in\mathbb R^{40}.
+\label{eq:q5-40d}
+\end{equation}
+其中 $t_{ik}$ 按投放先后排序，并满足
+\begin{equation}
+t_{i,k+1}-t_{ik}\ge1,
+\qquad k=1,2.
+\label{eq:q5-gap}
+\end{equation}
+
+题面规定“每架无人机至多投放3枚”。为了避免再引入5组离散启用变量，本文以每机3个连续槽位直接表示。该处理需要证明不会改变原题最优目标值。
+
+\begin{propositionbox}
+\textbf{命题2（三槽表示的目标等价性）}\quad
+在假设3“不同烟幕之间不存在负向相互作用”成立、且本题任务时域允许补充满足 $1\,\mathrm s$ 间隔的投放时刻时，“每机至多3枚”的原问题与“每机固定3个连续槽位”的模型具有相同最优 $H_\Sigma$。
+
+\textbf{证明：}
+记原问题可行域为 $\Omega_{\le3}$，固定三槽可行域为 $\Omega_3$。显然 $\Omega_3\subseteq\Omega_{\le3}$，故三槽模型的最优值不超过原问题最优值。反之，任取 $\Omega_{\le3}$ 中的方案；若某架无人机实际少于3枚，则可在 $[0,T_{\max}]$ 内补充满足间隔约束的投放时刻并取 $\delta=0$。本题 $T_{\max}>60\,\mathrm s$，而每机只需布置至多3个相隔 $1\,\mathrm s$ 的时刻，因此补充时刻总能构造。加入额外烟幕后，有效烟幕集合只会扩大，式\eqref{eq:q5-D}中的内层最小距离不会增大，故各 $E_j$ 与 $H_j$ 均不会减小。于是任一“至多3枚”方案都可扩展为目标值不低于原方案的三槽方案，得到反向不等式。两者最优值相等。证毕。\proofend
+\end{propositionbox}
+
+因此，最终方案中出现边际贡献为0的槽位并非资源约束处理错误，而是连续等价表示允许存在的冗余槽位；其边际状态将在最终方案后单独核验。
+
+\subsection{三导弹联合效能与完整模型}
+给定40维策略 $\vec x$，令 $\mathcal C(t;\vec x)$ 为时刻 $t$ 仍处于有效期的全部烟幕中心集合。对导弹 $M_j$ 定义
+\begin{equation}
+D_j(t;\vec x)=
+\max_{\vec q\in\mathcal V_j(t)}
+\min_{\vec c\in\mathcal C(t;\vec x)}
+ d_{\rm seg}\!\left(\vec c,[\vec m_j(t),\vec q]\right),
+\qquad j=1,2,3,
+\label{eq:q5-D}
+\end{equation}
+若 $\mathcal C(t;\vec x)=\varnothing$，约定 $D_j=+\infty$。于是
+\begin{equation}
+E_j(\vec x)=\{t:D_j(t;\vec x)\le10\},
+\qquad
+H_j(\vec x)=\mu(E_j(\vec x)).
+\label{eq:q5-Hj}
+\end{equation}
+三枚导弹的主效能定义为
+\begin{equation}
+H_\Sigma(\vec x)=\sum_{j=1}^{3}H_j(\vec x),
+\label{eq:q5-sum}
+\end{equation}
+单位记作“导弹$\cdot$s”，其中“导弹”为无量纲计数因子。完整模型写为
+\begin{equation}
+\left\{
+\begin{aligned}
+\max_{\vec x\in\mathbb R^{40}}\quad &H_\Sigma(\vec x),\\
+\text{s.t.}\quad
+&0\le\theta_i<2\pi,\qquad 70\le v_i\le140,\\
+&0\le t_{i1},\qquad t_{i,k+1}-t_{ik}\ge1,\\
+&0\le\delta_{ik}\le\sqrt{2h_i/g},\\
+&t_{ik}+\delta_{ik}\le T_{\max},
+\qquad i=1,\ldots,5,\ k=1,2,3.
+\end{aligned}
+\right.
+\label{eq:q5-model}
+\end{equation}
+其中投放间隔式仅对 $k=1,2$ 使用。模型中不存在 UAV--导弹排他分配变量；同一烟幕可同时帮助多枚导弹，不同烟幕也可分别遮挡同一导弹视野中的不同目标射线。
+
+为解释真实墙钟时间，另定义
+\begin{equation}
+H_\cup=\mu(E_1\cup E_2\cup E_3),
+\label{eq:q5-union}
+\end{equation}
+但它只用于解释多导弹时间重叠，不替代主目标 $H_\Sigma$。
+
+\subsection{结构化初始化、全局搜索与局部精修}
+40维完全随机初始化在既有全局搜索中可用候选率较低。为此先求解 $5\times3=15$ 个“单无人机--单导弹”的三弹局部子问题，构造可达能力矩阵
+\begin{equation}
+A=(a_{ij})=
+\begin{pmatrix}
+4.9449&0&0\\
+3.8473&3.7904&3.3741\\
+3.0404&2.9475&3.0693\\
+3.7890&3.7243&2.6882\\
+3.8485&3.5867&3.4790
+\end{pmatrix}\ \mathrm s.
+\label{eq:q5-A}
+\end{equation}
+$a_{ij}$ 只描述 FY$i$ 对 $M_j$ 的局部可达性，用于生成互补的40维初值；进入正式搜索后不再出现在目标函数与约束中。
+
+全局阶段设置4条完整40维 DE 支路：前三条的初始种群含结构化或局部能力块，第四条为纯随机冷启动。各支路在相同120代预算下产生候选后，统一用严格评价器复算，并按目标值与参数距离筛选互异盆地。局部阶段利用 $\vec x=(\vec x_1,\ldots,\vec x_5)$ 的自然块结构，依次开放一架无人机的8个变量进行块精修；空间结构稳定后，只对30个投放/起爆时序变量执行 $0.020$、$0.005$、$0.00125$ 和 $0.0003125\,\mathrm s$ 四级后抛光。整个过程始终评价同一个 $H_\Sigma$，分块仅改变搜索组织方式。
+
+\steptext{1}{结构化种子构造}{由15个局部子问题与随机样本形成多样化40维初始种群。}
+\steptext{2}{四支路完整搜索}{在同一40维模型上运行结构化、混合和纯随机冷启动支路。}
+\steptext{3}{统一严格重排}{对前列候选重新计算 $(H_1,H_2,H_3,H_\Sigma)$ 并筛选互异盆地。}
+\steptext{4}{五机变量块轮换}{依次开放五个8维变量块，所有接受判定仍基于完整40维联合目标。}
+\steptext{5}{时序后抛光}{固定空间结构，以四级步长细化投放/起爆时序。}
+\steptext{6}{严格认证}{执行 L1/L2/L3 分层复算、约束回代、地面诊断与独立有限圆柱几何复核。}
+
+图\ref{fig:q5flow}只展示求解控制逻辑，与上述 STEP 分工：STEP 给出顺序与职责，流程图突出“盆地精修--收敛判断--时序抛光--认证”的循环关系。
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{F07_Q5联合优化流程图.pdf}
+  \caption{问题五40维联合模型的求解与严格认证流程}
+  \label{fig:q5flow}
+\end{figure}
+
+\subsection{最终方案与烟幕槽位作用}
+五架无人机最终航向与速度见表\ref{tab:q5-uav}。
+\begin{table}[H]
+\centering
+\caption{问题五五架无人机最终飞行策略}
+\label{tab:q5-uav}
+\begin{tabular}{lcc}
+\toprule
+无人机 & 航向/$^\circ$ & 速度/(m/s) \\
+\midrule
+FY1 & 179.465931 & 121.850174 \\
+FY2 & 262.125542 & 117.012280 \\
+FY3 & 85.612140  & 139.996881 \\
+FY4 & 264.621692 & 139.527140 \\
+FY5 & 115.183105 & 139.917936 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+十五个连续烟幕槽的投放--起爆时序见表\ref{tab:q5-time}。
+\begin{table}[tbp]
+\centering
+\caption{问题五十五个烟幕槽的投放与起爆时序}
+\label{tab:q5-time}
+\small
+\begin{tabular}{lccccc}
+\toprule
+无人机 & 槽号 & 投放时刻/s & 起爆延迟/s & 起爆时刻/s & 事后主要贡献标签 \\
+\midrule
+FY1&1&0.163282&3.412365&3.575648&M1\\
+FY1&2&3.816973&4.948943&8.765917&M1\\
+FY1&3&10.473130&14.342959&24.816089&M1\\
+FY2&1&5.109965&6.538273&11.648238&M1\\
+FY2&2&6.360779&12.025963&18.386742&M3\\
+FY2&3&38.266413&13.190887&51.457300&M1\\
+FY3&1&0.239507&6.550830&6.790337&M3\\
+FY3&2&23.417780&0.130784&23.548564&M2\\
+FY3&3&49.189090&2.993653&52.182743&M1\\
+FY4&1&0.582916&10.977226&11.560142&M2\\
+FY4&2&5.236528&11.567951&16.804479&M3\\
+FY4&3&56.125653&3.543556&59.669209&M1\\
+FY5&1&12.457206&0.262056&12.719262&M3\\
+FY5&2&30.619797&5.880122&36.499920&M1\\
+FY5&3&45.072508&9.069050&54.141558&M1\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+图\ref{fig:q5deploy}把15个槽放在同一时间轴上，并用第二编码区分正边际与零边际槽位。
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.90\textwidth]{F08_Q5部署时序.pdf}
+  \caption{问题五五机十五弹的投放--起爆时序与边际状态}
+  \label{fig:q5deploy}
+\end{figure}
+
+逐弹删除审计显示，15个槽中7个对最终 $H_\Sigma$ 有正边际贡献，8个槽的边际贡献为0。图\ref{fig:q5marginal}进一步把每个槽对 M1--M3 的边际贡献展开：FY1-1、FY1-2、FY2-1 主要支撑 M1，FY3-2 与 FY4-1 主要支撑 M2，FY4-2 与 FY5-1 主要支撑 M3。零边际槽与命题2相一致，它们用于保持连续三槽表示的统一性，而不应被解释为“必须消耗才能达到当前效能”的关键烟幕。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.78\textwidth]{F10_Q5逐弹边际贡献矩阵.pdf}
+  \caption{问题五十五个烟幕槽对三枚导弹的逐弹边际贡献}
+  \label{fig:q5marginal}
+\end{figure}
+
+\subsection{三导弹累计效能与重叠结构}
+最终有效区间见表\ref{tab:q5-intervals}。
+\begin{table}[tbp]
+\centering
+\caption{问题五三枚导弹的联合有效遮蔽区间}
+\label{tab:q5-intervals}
+\begin{tabular}{lccc}
+\toprule
+导弹 & 区间 & 起点/s & 终点/s \\
+\midrule
+M1&1&4.738335&10.950872\\
+M1&2&12.377999&16.248967\\
+M2&1&12.829424&16.545054\\
+M2&2&24.263066&27.265874\\
+M3&1&13.218021&17.086223\\
+M3&2&17.209413&20.703855\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+因此
+\begin{equation}
+H_1=10.083504639\,\mathrm s,\qquad
+H_2=6.718437500\,\mathrm s,\qquad
+H_3=7.362644043\,\mathrm s,
+\label{eq:q5-H-result}
+\end{equation}
+并得到
+\begin{equation}
+\boxed{H_\Sigma=24.164586182\ \text{导弹}\cdot\mathrm s},
+\qquad H_\cup=17.418010254\,\mathrm s.
+\label{eq:q5-final}
+\end{equation}
+
+按同一墙钟时刻受干扰导弹数量分解，记恰有1枚、2枚、3枚导弹同时受干扰的墙钟时长为 $W_1,W_2,W_3$，最终结果为
+\[
+W_1=13.702380\,\mathrm s,\qquad
+W_2=0.684684\,\mathrm s,\qquad
+W_3=3.030946\,\mathrm s,
+\]
+故
+\begin{equation}
+H_\cup=W_1+W_2+W_3,
+\qquad
+H_\Sigma=W_1+2W_2+3W_3.
+\label{eq:overlap-id}
+\end{equation}
+图\ref{fig:q5joint}显示，约 $13.218\sim16.249\,\mathrm s$ 内三枚导弹同时处于有效遮蔽状态，形成 $3.031\,\mathrm s$ 的三重重叠；另有 $0.685\,\mathrm s$ 的双重重叠。因而 $H_\Sigma>H_\cup$ 并非重复计数错误，而是主效能对同时干扰多枚导弹的真实累计。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{F09_Q5联合区间与重叠.pdf}
+  \caption{问题五三枚导弹的联合有效区间与同时受干扰数量}
+  \label{fig:q5joint}
+\end{figure}
+
+\subsection{初始化消融、块精修与严格复算}
+全局搜索记录可直接形成初始化方式的对照。前三条含结构化/混合初值的40维支路，在相同120代预算后经严格复算得到的支路最优候选分别为 $19.1803$、$18.9478$ 和 $18.9280\,\text{导弹}\cdot\mathrm s$；纯随机冷启动 DE4 的支路最优候选仅为 $1.4395\,\text{导弹}\cdot\mathrm s$。这说明在当前昂贵、非光滑的40维评价下，结构化初值明显提高了有限预算内进入高质量可行盆地的能力。该比较来自现有单次分支记录，因而只作为初始化机制的消融证据，不解释为跨算法统计显著性检验。
+
+进入最佳盆地后，五机变量块轮换把严格候选从约 $18.93$ 继续提升至 $24.26\,\text{导弹}\cdot\mathrm s$ 量级，随后时序抛光只产生 $10^{-2}\sim10^{-4}\,\text{导弹}\cdot\mathrm s$ 的细尺度改进。图\ref{fig:q5verify}将初始化消融、最佳盆地逐轮抬升和最终 L1--L3 复算放在同一证据链中。
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{F11_Q5搜索改进与数值收敛.pdf}
+  \caption{问题五结构化初始化、块精修与分层严格复算}
+  \label{fig:q5verify}
+\end{figure}
+
+最终 L1/L2/L3 复算见表\ref{tab:q5-conv}。
+\begin{table}[tbp]
+\centering
+\caption{问题五最终方案的分层数值复算}
+\label{tab:q5-conv}
+\small
+\begin{tabular}{cccccc}
+\toprule
+层级 & 时间步长/s & 平面网格 & $H_1$/s & $H_2$/s & $H_3$/s \\
+\midrule
+L1 & 0.025 & 101 & 10.085388 & 6.723315 & 7.363660 \\
+L2 & 0.015 & 151 & 10.083867 & 6.719531 & 7.362902 \\
+L3 & 0.010 & 201 & 10.083504639 & 6.718437500 & 7.362644043 \\
+\bottomrule
+\end{tabular}
+\end{table}
+L2--L3 的最大分导弹时长差为 $0.001094\,\mathrm s$；独立有限圆柱几何核与高精度评价器之间的最大距离差为 $0.000367\,\mathrm m$。全部速度、投放间隔、起爆高度与任务时限约束均通过回代。因此，本问结果可表述为经“初始化消融--多盆地搜索--变量块精修--时序抛光--分层复算--独立几何核”支持的\textbf{稳定高质量方案}，但不作理论全局最优声明。
+
+\FloatBarrier
